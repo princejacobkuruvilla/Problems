@@ -1,0 +1,63 @@
+//code is based on Tushar's youtube video on the problem.
+//C#
+public class Solution {
+    public class Building{
+        public int x;
+        public int y;
+        public bool isStart;
+        
+        public Building(int x, int y, bool isStart)
+        {
+            this.x = x;
+            this.y = y;
+            this.isStart = isStart;
+        }
+    }
+    public IList<IList<int>> GetSkyline(int[][] buildings) {
+        List<Building> list = new List<Building>();
+        foreach(int[] b in buildings)
+        {
+            Building start = new Building(b[0], b[2], true);
+            Building end = new Building(b[1], b[2], false);
+            list.Add(start);
+            list.Add(end);
+        }
+        
+        list = list.OrderBy(b => b.x).ThenBy(b => b.isStart ? -b.y : b.y).ToList();
+        
+        SortedDictionary<int, int> pq = new SortedDictionary<int, int>();
+        pq.Add(0, 1);
+        int max_height = 0;
+        IList<IList<int>> res = new List<IList<int>>();
+        foreach(Building b in list)
+        {
+            if(b.isStart)
+                AddToPQ(pq, -b.y);
+            else
+                RemoveFromPQ(pq, -b.y);
+            
+            if(max_height != -pq.First().Key)
+            {
+                max_height = -pq.First().Key;
+                res.Add(new List<int>{b.x, max_height});
+            }
+        }
+        return res;
+    }
+    
+    public void AddToPQ(SortedDictionary<int, int> pq, int key)
+    {
+        if(pq.ContainsKey(key))
+            pq[key]++;
+        else
+            pq.Add(key, 1);
+    }
+    
+    public void RemoveFromPQ(SortedDictionary<int, int> pq, int key)
+    {
+        if(pq[key] == 1)
+            pq.Remove(key);
+        else
+            pq[key]--;
+    }
+}
